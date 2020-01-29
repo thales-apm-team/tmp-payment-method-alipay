@@ -26,7 +26,7 @@ public class Manual {
     public static void main( String[] args ) throws NoSuchAlgorithmException {
         //create_forex_trade();
         //create_forex_trade_wap();
-        single_trade_query("PAYLINE20200116105303");
+        single_trade_query("0");
     }
 
     private static void create_forex_trade(){
@@ -132,7 +132,7 @@ public class Manual {
 
     private static PrivateKey getPk(){
         String keyStoreType = "pkcs12";
-        String keyStorePath = "/home/vagrant/Documents/Monext/Mdp/Alipay/AlipaySandbox20200115.p12";
+        String keyStorePath = "/home/dev/Documents/AliPay/AlipaySandbox20200115.p12";
         char[] passwd = "AlipayCert2020".toCharArray();
         String alias = "selfsigned";
 
