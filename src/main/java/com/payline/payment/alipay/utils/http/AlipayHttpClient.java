@@ -1,5 +1,6 @@
 package com.payline.payment.alipay.utils.http;
 
+import com.payline.payment.alipay.bean.AlipayAPIResponse;
 import com.payline.payment.alipay.bean.configuration.RequestConfiguration;
 import com.payline.payment.alipay.exception.InvalidDataException;
 import com.payline.payment.alipay.exception.PluginException;
@@ -142,6 +143,25 @@ public class AlipayHttpClient {
             throw new InvalidDataException("Missing API url from partner configuration (sensitive properties)");
         }
 
+    }
+    /**------------------------------------------------------------------------------------------------------------------*/
+    public AlipayAPIResponse single_trade_query(RequestConfiguration requestConfiguration){
+        // Create parameters
+        ArrayList<NameValuePair> params = new ArrayList<>();
+
+        params.add(new BasicNameValuePair("_input_charset", requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.INPUT_CHARSET).getValue()));
+        //TODO : Récupérer le numéro de transaction via request.getTransaction
+        params.add(new BasicNameValuePair("out_trade_no", requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.TRANSACTION_ID).getValue()));
+        params.add(new BasicNameValuePair("partner", requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.PARTNER_ID).getValue()));
+        params.add(new BasicNameValuePair("service", requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.SERVICE).getValue()));
+        params.add(new BasicNameValuePair("sign_type", requestConfiguration.getContractConfiguration().getProperty(Constants.ContractConfigurationKeys.SIGN_TYPE).getValue()));
+
+        // Get the result of the request
+        StringResponse response = get(requestConfiguration, params);
+
+        AlipayAPIResponse alipayAPIResponse = AlipayAPIResponse.fromXml(response.getContent());
+
+        return alipayAPIResponse;
     }
     /**------------------------------------------------------------------------------------------------------------------*/
     /**

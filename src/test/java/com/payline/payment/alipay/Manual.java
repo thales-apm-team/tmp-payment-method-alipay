@@ -1,5 +1,6 @@
 package com.payline.payment.alipay;
 
+
 import javax.xml.bind.DatatypeConverter;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,9 +25,9 @@ public class Manual {
     private static final SimpleDateFormat timestamp = new SimpleDateFormat("YYYYMMddHHmmss");
 
     public static void main( String[] args ) throws NoSuchAlgorithmException {
-        //create_forex_trade();
+        create_forex_trade();
         //create_forex_trade_wap();
-        single_trade_query("0");
+        //single_trade_query("PAYLINE20200116105304");
     }
 
     private static void create_forex_trade(){

@@ -1,6 +1,7 @@
 package com.payline.payment.alipay.utils.http;
 
 import com.payline.payment.alipay.MockUtils;
+import com.payline.payment.alipay.bean.AlipayAPIResponse;
 import com.payline.payment.alipay.bean.configuration.RequestConfiguration;
 import com.payline.payment.alipay.exception.InvalidDataException;
 import com.payline.payment.alipay.exception.PluginException;
@@ -38,8 +39,8 @@ class AlipayHttpClientTest {
         alipayHttpClient = new AlipayHttpClient();
         MockitoAnnotations.initMocks(this);
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
     // --- Test SharegroopHttpClient#execute ---
-
     @Test
     void execute_nominal() throws IOException {
         // given: a properly formatted request, which gets a proper response
@@ -59,7 +60,7 @@ class AlipayHttpClientTest {
         assertEquals(expectedStatusMessage, stringResponse.getStatusMessage());
         assertEquals(expectedContent, stringResponse.getContent());
     }
-
+    /**------------------------------------------------------------------------------------------------------------------*/
     @Test
     void execute_retry() throws IOException {
         // given: the first 2 requests end up in timeout, the third request gets a response
@@ -75,6 +76,7 @@ class AlipayHttpClientTest {
         // then: the client finally gets the response
         assertNotNull(stringResponse);
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
 
     @Test
     void execute_retryFail() throws IOException {
@@ -85,6 +87,7 @@ class AlipayHttpClientTest {
         // when: sending the request, a PluginException is thrown
         assertThrows(PluginException.class, () -> alipayHttpClient.execute(request));
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
 
     @Test
     void execute_invalidResponse() throws IOException {
@@ -95,6 +98,7 @@ class AlipayHttpClientTest {
         // when: sending the request, a PluginException is thrown
         assertThrows(PluginException.class, () -> alipayHttpClient.execute(request));
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
 
     @Test
     void get_missingApiUrl() {
@@ -104,6 +108,7 @@ class AlipayHttpClientTest {
         // when calling the refund method, an exception is thrown
         assertThrows(InvalidDataException.class, () -> alipayHttpClient.get(requestConfiguration,MockUtils.aValidParametersList()));
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
 
     @Test
     void get_invalidApiUrl() {
@@ -113,10 +118,12 @@ class AlipayHttpClientTest {
         // when calling the get method, an exception is thrown
         assertThrows(InvalidDataException.class, () -> alipayHttpClient.get(requestConfiguration,MockUtils.aValidParametersList()));
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
+
     @Test
     void verifyConnection_EmptyResponseContent() throws IOException {
         // given: the API base URL is missing from the partner configuration
-        RequestConfiguration requestConfiguration = new RequestConfiguration(MockUtils.aContractConfiguration(), MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
+        RequestConfiguration requestConfiguration = new RequestConfiguration(MockUtils.aContractConfigurationToVerifyConnection(), MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
 
         StringResponse response = HttpTestUtils.mockStringResponse(200, "OK", null, null);
 
@@ -126,10 +133,12 @@ class AlipayHttpClientTest {
 
         verify(http, never()).execute(any(HttpRequestBase.class));
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
+
     @Test
     void verifyConnection_GoodResponseContent() throws IOException {
         // given: the API base URL is missing from the partner configuration
-        RequestConfiguration requestConfiguration = new RequestConfiguration(MockUtils.aContractConfiguration(), MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
+        RequestConfiguration requestConfiguration = new RequestConfiguration(MockUtils.aContractConfigurationToVerifyConnection(), MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
 
         String content= "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<alipay><is_success>F</is_success><error>TRADE_NOT_EXIST</error></alipay>";
         StringResponse response = HttpTestUtils.mockStringResponse(200, "OK", content, null);
@@ -140,7 +149,7 @@ class AlipayHttpClientTest {
 
         verify(http, never()).execute(any(HttpRequestBase.class));
     }
-
+    /**------------------------------------------------------------------------------------------------------------------*/
 
     static PartnerConfiguration anInvalidPartnerConfiguration() {
         Map<String, String> partnerConfigurationMap = new HashMap<>();
@@ -151,4 +160,24 @@ class AlipayHttpClientTest {
 
         return new PartnerConfiguration(partnerConfigurationMap, sensitiveConfigurationMap);
     }
+    /**------------------------------------------------------------------------------------------------------------------*/
+    // Test the single trade query API call
+    @Test
+    void verify_Single_Trade_Query() throws IOException {
+        // given: the API base URL is missing from the partner configuration
+
+        RequestConfiguration requestConfiguration = new RequestConfiguration(MockUtils.aContractConfiguration(), MockUtils.anEnvironment(), MockUtils.aPartnerConfiguration());
+
+        String content= "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<alipay><is_success>T</is_success><request><param name=\"out_trade_no\">PAYLINE20200116105303</param><param name=\"partner\">2088621926786355</param><param name=\"_input_charset\">utf-8</param><param name=\"service\">single_trade_query</param></request><response><trade><buyer_email>for***@alitest.com</buyer_email><buyer_id>2088622942481446</buyer_id><discount>0.00</discount><flag_trade_locked>0</flag_trade_locked><gmt_create>2020-01-16 17:56:12</gmt_create><gmt_last_modified_time>2020-01-16 17:56:13</gmt_last_modified_time><gmt_payment>2020-01-16 17:56:13</gmt_payment><is_total_fee_adjust>F</is_total_fee_adjust><operator_role>B</operator_role><out_trade_no>PAYLINE20200116105303</out_trade_no><payment_type>100</payment_type><price>73.82</price><quantity>1</quantity><seller_email>for***@alitest.com</seller_email><seller_id>2088621926786355</seller_id><subject>Test</subject><to_buyer_fee>0.00</to_buyer_fee><to_seller_fee>73.82</to_seller_fee><total_fee>73.82</total_fee><trade_no>2020011622001381441000075584</trade_no><trade_status>TRADE_FINISHED</trade_status><use_coupon>F</use_coupon></trade></response><sign>RkzpAs7cQNjw0JelHVZDj1rv7pcUr2O1xJoVOZzuqOlElz9hWM4I88ydNYinDhqcHDDIDvyuy06ceGAYutDYcTt7QRP/ZhUnaAy+ahlwt8Y+SrgiHYpero1qMkcc3xdy016f0oCnGkTE+k9myya5YvTBiFFtmGMTFyzfiiCWZDXKNM/CKODnEK1znqpWFr0r5RGdTJDvqxApjUwfm4OXyUW65d7O64+WQMSeT2XxNOLP60Ah91En73fSbXQ6uP6WdQ9GkHOPoemw2Tgmzw/Ehby5ILb9Br93t/pqO9hl9TcKDWCgx1PpErRUfer3u1UNU5lu8EvfHBEAkrEJR/JvGA==</sign><sign_type>RSA2</sign_type></alipay>";
+        StringResponse response = HttpTestUtils.mockStringResponse(200, "OK", content, null);
+
+        doReturn(response).when(alipayHttpClient).execute(any(HttpRequestBase.class));
+
+        assertNotNull(alipayHttpClient.single_trade_query(requestConfiguration));
+
+        verify(http, never()).execute(any(HttpRequestBase.class));
+    }
+    /**------------------------------------------------------------------------------------------------------------------*/
+
 }
