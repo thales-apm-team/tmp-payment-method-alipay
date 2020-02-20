@@ -1,0 +1,1 @@
+# tmp-payment-method-alipay
